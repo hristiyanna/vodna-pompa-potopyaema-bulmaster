@@ -24,11 +24,7 @@ src="https://www.facebook.com/tr?id=1009181617952379&ev=PageView&noscript=1"/>
 </noscript>
 <!-- End Meta Pixel Code -->
 
-<!-- EmailJS -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-  emailjs.init('P4L6cF3dR35oQQkSr'); // <-- ЗАМЕНИ С ТВОЯ EmailJS Public Key
-</script>
+
 
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1250,29 +1246,40 @@ function submitOrder(inputId, successId) {
 
   const now = new Date().toLocaleString('bg-BG');
 
-  emailjs.send('service_pv4vagj', 'template_y6fdkln', {  // <-- ЗАМЕНИ АКО ИМАШ РАЗЛИЧНИ ID-та
-    phone: phone,
-    product: 'Водна Помпа Потопяема ДРУЖБА 600W',
-    price: '30.00€',
-    time: now,
+  fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      access_key: '44400c94-481f-48c1-92dc-ce4911adf8c6',
+      subject: '🛒 Нова поръчка — Водна Помпа ДРУЖБА 600W',
+      phone: phone,
+      product: 'Водна Помпа Потопяема ДРУЖБА 600W',
+      price: '30.00€',
+      time: now,
+    })
   })
-  .then(function() {
-    // Meta Pixel Purchase event
-    if (typeof fbq !== 'undefined') {
-      fbq('track', 'Purchase', {
-        value: 30.00,
-        currency: 'EUR',
-        content_name: 'Водна Помпа Потопяема ДРУЖБА 600W',
-        content_ids: ['95213'],
-        content_type: 'product'
-      });
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.success) {
+      // Meta Pixel Purchase event
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'Purchase', {
+          value: 30.00,
+          currency: 'EUR',
+          content_name: 'Водна Помпа Потопяема ДРУЖБА 600W',
+          content_ids: ['95213'],
+          content_type: 'product'
+        });
+      }
+      document.getElementById(successId).classList.add('show');
+      btn.style.display = 'none';
+      input.style.display = 'none';
+    } else {
+      throw new Error('Web3Forms error');
     }
-    document.getElementById(successId).classList.add('show');
-    btn.style.display = 'none';
-    input.style.display = 'none';
   })
   .catch(function(err) {
-    console.error('EmailJS error:', err);
+    console.error('Error:', err);
     btn.textContent = 'Грешка! Опитай отново.';
     btn.disabled = false;
     btn.style.background = '#888';
